@@ -1,0 +1,25 @@
+Initial project setup for CBR Reader
+
+- Project documentation and architecture analysis
+- GitHub repository initialization
+- Docker Compose for local PostgreSQL
+- Project decisions and roadmap documentation
+- MCP servers configuration (7 servers)
+
+Features planned:
+- Comic reader for CBR/CBZ/JPG formats
+- Multi-language OCR and TTS (Ukrainian, English, Russian, Belarusian)
+- Web app for tablets with offline support
+- Admin content management
+- User profiles and progress tracking
+
+Tech stack:
+- Backend: Java 17 + Spring Boot 3.x
+- Frontend: React 18+
+- Database: PostgreSQL
+- Cloud: Google Cloud Platform
+- Deployment: Cloud Run
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>

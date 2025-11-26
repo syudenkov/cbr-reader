@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(where claude)",
+      "Bash(claude config --help)",
+      "Bash(claude mcp:*)",
+      "Bash(gh auth:*)",
+      "Bash(gh repo create:*)",
+      "Bash(git init:*)",
+      "Bash(git remote add:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nInitial project setup for CBR Reader\n\n- Project documentation and architecture analysis\n- GitHub repository initialization\n- Docker Compose for local PostgreSQL\n- Project decisions and roadmap documentation\n- MCP servers configuration (7 servers)\n\nFeatures planned:\n- Comic reader for CBR/CBZ/JPG formats\n- Multi-language OCR and TTS (Ukrainian, English, Russian, Belarusian)\n- Web app for tablets with offline support\n- Admin content management\n- User profiles and progress tracking\n\nTech stack:\n- Backend: Java 17 + Spring Boot 3.x\n- Frontend: React 18+\n- Database: PostgreSQL\n- Cloud: Google Cloud Platform\n- Deployment: Cloud Run\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
