@@ -10,7 +10,7 @@ spring:
       cookie:
         http-only: true
         secure: ${COOKIE_SECURE:false}
-        same-site: lax
+        same-site: strict
     multipart:
       max-file-size: 500MB
       max-request-size: 500MB
