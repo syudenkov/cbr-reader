@@ -1,0 +1,77 @@
+{
+  "timestamp": "2026-01-04T21:18:30.750Z",
+  "answers": [
+    {
+      "questionId": 1,
+      "question": "Project Structure - Monorepo vs Separate Repos",
+      "category": "Architecture & Approach",
+      "answer": "a"
+    },
+    {
+      "questionId": 2,
+      "question": "API Architecture and Communication Pattern",
+      "category": "Frontend-Backend Integration",
+      "answer": "a"
+    },
+    {
+      "questionId": 3,
+      "question": "Database Schema for File Metadata and Processing Results",
+      "category": "Data & State Management",
+      "answer": "a"
+    },
+    {
+      "questionId": 4,
+      "question": "CBR/CBZ File Processing Strategy",
+      "category": "Technical Details",
+      "answer": "a"
+    },
+    {
+      "questionId": 5,
+      "question": "TTS Processing Workflow and User Experience",
+      "category": "Technical Details",
+      "answer": "a"
+    },
+    {
+      "questionId": 6,
+      "question": "Authentication and Authorization Strategy",
+      "category": "Security & Authentication",
+      "answer": "b"
+    },
+    {
+      "questionId": 7,
+      "question": "File Storage and Serving Strategy",
+      "category": "Deployment & Integration",
+      "answer": "a"
+    },
+    {
+      "questionId": 8,
+      "question": "Frontend State Management Approach",
+      "category": "Frontend-Backend Integration",
+      "answer": "b"
+    },
+    {
+      "questionId": 9,
+      "question": "Testing Approach for Full-Stack Application",
+      "category": "Testing Strategy",
+      "answer": "a"
+    },
+    {
+      "questionId": 10,
+      "question": "LLM Integration for OCR - Provider Strategy",
+      "category": "Technical Details",
+      "answer": "a"
+    },
+    {
+      "questionId": 11,
+      "question": "User Position Tracking Granularity",
+      "category": "Data & State Management",
+      "answer": "a"
+    },
+    {
+      "questionId": 12,
+      "question": "Deployment Environment and Hosting",
+      "category": "Deployment & Integration",
+      "answer": "a"
+    }
+  ]
+}

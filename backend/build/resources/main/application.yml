@@ -1,0 +1,27 @@
+spring:
+  application:
+    name: cbr-viewer
+  datasource:
+    url: jdbc:sqlite:${SQLITE_PATH:./data/cbr_viewer.db}
+    driver-class-name: org.sqlite.JDBC
+  servlet:
+    session:
+      timeout: 24h
+      cookie:
+        http-only: true
+        secure: ${COOKIE_SECURE:false}
+        same-site: lax
+    multipart:
+      max-file-size: 500MB
+      max-request-size: 500MB
+
+server:
+  port: 8080
+
+app:
+  storage:
+    comics-path: ${COMICS_PATH:./storage/comics}
+    audio-path: ${AUDIO_PATH:./storage/audio}
+    cache-path: ${CACHE_PATH:./storage/cache}
+  cors:
+    allowed-origins: ${CORS_ORIGINS:http://localhost:5173}

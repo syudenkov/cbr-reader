@@ -1,0 +1,317 @@
+[
+  {
+    "id": 1,
+    "category": "Architecture & Approach",
+    "title": "Project Structure - Monorepo vs Separate Repos",
+    "context": "You specified:\n- Backend: Java 21 + Spring Boot 4 + SQLite\n- Frontend: React 18 + MUI\n\nThese are two different technology stacks that will need to communicate.",
+    "ambiguity": "It's unclear whether this should be organized as a monorepo (single repository with /backend and /frontend folders) or as separate repositories for backend and frontend.",
+    "question": "How should the project structure be organized?",
+    "options": [
+      {
+        "key": "a",
+        "label": "Monorepo (Recommended)",
+        "description": "Single repository with /backend and /frontend folders. Easier coordination, shared versioning, simpler deployment setup."
+      },
+      {
+        "key": "b",
+        "label": "Separate repositories",
+        "description": "Independent repos for backend and frontend. More flexibility for independent deployment and scaling, but requires API versioning strategy."
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "category": "Frontend-Backend Integration",
+    "title": "API Architecture and Communication Pattern",
+    "context": "The application needs:\n- File viewing (CBR/CBZ extraction and serving)\n- Position tracking\n- Rating system\n- TTS processing with LLM integration\n- Admin functionality (user/file management, logs)\n\nThis involves multiple API endpoints with different characteristics (file streaming, metadata CRUD, async processing).",
+    "ambiguity": "The API design pattern isn't specified. Different patterns suit different use cases.",
+    "question": "Which API architecture should be used for frontend-backend communication?",
+    "options": [
+      {
+        "key": "a",
+        "label": "RESTful API (Recommended)",
+        "description": "Standard REST endpoints. Best for file serving, CRUD operations, well-documented Spring Boot support. Straightforward for admin panel."
+      },
+      {
+        "key": "b",
+        "label": "GraphQL API",
+        "description": "Single endpoint with flexible queries. Good for complex data fetching, but adds complexity and may be overkill for this use case."
+      },
+      {
+        "key": "c",
+        "label": "Hybrid (REST + WebSockets)",
+        "description": "REST for CRUD/files, WebSockets for real-time TTS processing status updates. More complex but provides live progress feedback."
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "category": "Data & State Management",
+    "title": "Database Schema for File Metadata and Processing Results",
+    "context": "You mentioned:\n- SQLite for storage\n- Files stored on disk\n- Need to track: positions, ratings, TTS processing results (JSON with speakers/audio)\n- User management, audit logs\n\nTTS results could be large JSON objects with page-by-page speaker identification and audio file references.",
+    "ambiguity": "How should TTS processing results and file metadata be stored in the database? Large JSON objects in SQLite can impact performance.",
+    "question": "How should TTS processing results and complex metadata be stored?",
+    "options": [
+      {
+        "key": "a",
+        "label": "JSON columns in SQLite (Recommended)",
+        "description": "Store TTS results as JSON in the database. Simple, everything in one place, SQLite supports JSON functions since 3.38.0. Good for moderate file sizes."
+      },
+      {
+        "key": "b",
+        "label": "Separate JSON files on disk",
+        "description": "Store TTS results as .json files alongside the CBR/CBZ files. Database only stores file paths. Better for very large results, requires file management."
+      },
+      {
+        "key": "c",
+        "label": "Normalized relational tables",
+        "description": "Create tables: Pages, Speakers, AudioSegments with foreign keys. More complex schema but better queryability and data integrity."
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "category": "Technical Details",
+    "title": "CBR/CBZ File Processing Strategy",
+    "context": "CBR/CBZ files are comic book archives:\n- CBZ = ZIP archive with images\n- CBR = RAR archive with images\n\nThe viewer needs to:\n- Extract individual pages\n- Serve them to frontend\n- Support both fullscreen and scrolling modes\n\nThis can be done on-the-fly or pre-processed.",
+    "ambiguity": "Should files be extracted on-the-fly when viewing, or pre-extracted when uploaded?",
+    "question": "How should CBR/CBZ files be processed for viewing?",
+    "options": [
+      {
+        "key": "a",
+        "label": "On-the-fly extraction (Recommended)",
+        "description": "Extract pages from archive when requested. Saves disk space, no preprocessing delay. May need caching for performance."
+      },
+      {
+        "key": "b",
+        "label": "Pre-extract on upload",
+        "description": "Extract all pages when file is uploaded. Faster viewing, but uses more disk space. Easier to implement image optimization."
+      },
+      {
+        "key": "c",
+        "label": "Hybrid with caching",
+        "description": "Extract on-demand, cache extracted pages in temporary storage. Balance between disk space and performance."
+      }
+    ]
+  },
+  {
+    "id": 5,
+    "category": "Technical Details",
+    "title": "TTS Processing Workflow and User Experience",
+    "context": "You specified TTS processing should:\n1. Be on-demand (user requests it)\n2. Use LLM for OCR (OpenAI API + Claude API)\n3. Prepare JSON with speakers\n4. Use Minimax API for TTS\n5. Store results with files\n\nThis is a multi-step async process that could take several minutes for a full comic book.",
+    "ambiguity": "How should the TTS processing workflow be presented to the user? Should they wait, or can they navigate away?",
+    "question": "How should TTS processing be handled from a user experience perspective?",
+    "options": [
+      {
+        "key": "a",
+        "label": "Async with progress tracking (Recommended)",
+        "description": "User requests TTS, gets a job ID, can navigate away. Progress shown via polling or WebSocket. Notified when complete. Best UX for long processes."
+      },
+      {
+        "key": "b",
+        "label": "Synchronous blocking",
+        "description": "User waits on the page until processing completes. Simple to implement but poor UX for long waits. Risk of timeout."
+      },
+      {
+        "key": "c",
+        "label": "Background queue system",
+        "description": "User requests TTS, it's queued for background processing. No progress tracking, user checks back later. Simplest backend, minimal UX feedback."
+      }
+    ]
+  },
+  {
+    "id": 6,
+    "category": "Security & Authentication",
+    "title": "Authentication and Authorization Strategy",
+    "context": "You mentioned:\n- User management in admin panel\n- File viewing (presumably users need accounts)\n- Admin vs regular user roles implied\n\nSpring Boot 4 supports multiple auth strategies.",
+    "ambiguity": "What authentication mechanism should be implemented? This affects both backend and frontend architecture.",
+    "question": "Which authentication strategy should be used?",
+    "options": [
+      {
+        "key": "a",
+        "label": "JWT tokens (Recommended)",
+        "description": "Stateless authentication, tokens stored in frontend (localStorage/sessionStorage). Standard for React SPAs, good for REST APIs. Requires token refresh strategy."
+      },
+      {
+        "key": "b",
+        "label": "Session-based (cookies)",
+        "description": "Server-side sessions with HTTP-only cookies. More secure against XSS, but requires session storage. Traditional approach."
+      },
+      {
+        "key": "c",
+        "label": "OAuth2 / SSO",
+        "description": "External authentication provider (Google, GitHub, etc.). More complex but professional. Good if you want social login."
+      }
+    ]
+  },
+  {
+    "id": 7,
+    "category": "Deployment & Integration",
+    "title": "File Storage and Serving Strategy",
+    "context": "You specified:\n- Files stored on disk (first approach)\n- Backend serves files to frontend\n- Need to serve individual pages from CBR/CBZ archives\n- Need to serve generated audio files\n\nFile serving can be handled by Spring Boot directly or delegated to a web server.",
+    "ambiguity": "How should static files (comic pages, audio) be served to the frontend?",
+    "question": "What's the file serving strategy?",
+    "options": [
+      {
+        "key": "a",
+        "label": "Spring Boot serves everything (Recommended for MVP)",
+        "description": "Spring Boot handles all file serving via controllers. Simple, everything in one place. May need optimization later for high traffic."
+      },
+      {
+        "key": "b",
+        "label": "Nginx/Apache reverse proxy",
+        "description": "Web server in front serves static files, proxies API calls to Spring Boot. Better performance, more production-ready, but more complex setup."
+      },
+      {
+        "key": "c",
+        "label": "CDN for files",
+        "description": "Files served from CDN (S3 + CloudFront, etc.). Best performance, higher cost, requires file upload to cloud. Overkill for 'hosted somewhere' MVP."
+      }
+    ]
+  },
+  {
+    "id": 8,
+    "category": "Frontend-Backend Integration",
+    "title": "Frontend State Management Approach",
+    "context": "The React frontend needs to manage:\n- Current file and page position\n- User preferences (fullscreen vs scroll mode)\n- TTS processing status\n- Admin panel data (users, files, logs)\n- Authentication state\n\nReact 18 supports various state management approaches.",
+    "ambiguity": "What state management strategy should the React frontend use?",
+    "question": "Which state management approach for the React frontend?",
+    "options": [
+      {
+        "key": "a",
+        "label": "React Context + Hooks (Recommended)",
+        "description": "Built-in React features, no external dependencies. Good for moderate complexity. Use Context for global state (auth, current file), hooks for local state."
+      },
+      {
+        "key": "b",
+        "label": "Redux Toolkit",
+        "description": "Centralized state management with Redux. Better for complex state logic, time-travel debugging. More boilerplate, may be overkill."
+      },
+      {
+        "key": "c",
+        "label": "Zustand or Jotai",
+        "description": "Lightweight state management libraries. Less boilerplate than Redux, more structure than Context. Modern, simple API."
+      },
+      {
+        "key": "d",
+        "label": "React Query + Context",
+        "description": "React Query for server state (API data, caching), Context for client state (UI preferences). Separation of concerns, excellent caching."
+      }
+    ]
+  },
+  {
+    "id": 9,
+    "category": "Testing Strategy",
+    "title": "Testing Approach for Full-Stack Application",
+    "context": "This is a greenfield project with:\n- Backend: Spring Boot 4 (supports JUnit 5, MockMvc, TestContainers)\n- Frontend: React 18 (supports Jest, React Testing Library, Cypress, Playwright)\n- Integration points: File processing, LLM APIs, TTS generation\n\nTesting strategy affects project structure and CI/CD setup.",
+    "ambiguity": "What level of testing should be implemented from the start?",
+    "question": "What testing strategy should be established?",
+    "options": [
+      {
+        "key": "a",
+        "label": "Unit + Integration tests (Recommended)",
+        "description": "Backend: JUnit for services, MockMvc for controllers. Frontend: Jest + React Testing Library for components. No E2E initially. Practical balance."
+      },
+      {
+        "key": "b",
+        "label": "Full testing pyramid",
+        "description": "Unit + Integration + E2E (Playwright/Cypress). Most comprehensive, but slower to implement and run. Best for production-critical apps."
+      },
+      {
+        "key": "c",
+        "label": "Minimal testing",
+        "description": "Only critical path tests. Faster initial development, but risky for refactoring. Add tests incrementally as issues arise."
+      }
+    ]
+  },
+  {
+    "id": 10,
+    "category": "Technical Details",
+    "title": "LLM Integration for OCR - Provider Strategy",
+    "context": "You specified:\n- OpenAI API + Claude API for OCR\n- Need to extract text and identify speakers from comic pages\n- Results stored as JSON\n\nUsing multiple LLM providers requires a strategy.",
+    "ambiguity": "How should the dual LLM provider setup work? Should both be used, or is one a fallback?",
+    "question": "What's the strategy for using OpenAI + Claude for OCR?",
+    "options": [
+      {
+        "key": "a",
+        "label": "Primary + Fallback",
+        "description": "Try OpenAI first, fall back to Claude if it fails or hits rate limits. Resilient, but requires error handling and retry logic."
+      },
+      {
+        "key": "b",
+        "label": "User/Admin configurable",
+        "description": "Admin chooses which provider to use in settings. Simple, flexible, allows testing both. User or admin can switch based on cost/quality."
+      },
+      {
+        "key": "c",
+        "label": "Both used for validation",
+        "description": "Send to both APIs, compare results for accuracy. Best quality, but 2x cost and slower. Overkill unless quality is critical."
+      },
+      {
+        "key": "d",
+        "label": "Load balancing",
+        "description": "Distribute requests across both providers to avoid rate limits. Complex, requires request tracking. Good for high volume."
+      }
+    ]
+  },
+  {
+    "id": 11,
+    "category": "Data & State Management",
+    "title": "User Position Tracking Granularity",
+    "context": "You mentioned the app should 'remember positions of the files'.\n\nThis could mean:\n- Last page viewed in each comic\n- Scroll position within a page (for scroll mode)\n- Reading history with timestamps\n- Multiple bookmarks per file",
+    "ambiguity": "What level of detail should position tracking store?",
+    "question": "How detailed should position tracking be?",
+    "options": [
+      {
+        "key": "a",
+        "label": "Last page only (Recommended)",
+        "description": "Store one 'current page' number per file per user. Simple, covers the core use case. User resumes where they left off."
+      },
+      {
+        "key": "b",
+        "label": "Page + scroll position",
+        "description": "Store page number and Y-scroll position for scroll mode. More precise, especially for long vertical pages. Slightly more complex."
+      },
+      {
+        "key": "c",
+        "label": "Full reading history",
+        "description": "Track every page view with timestamps. Enables analytics (reading speed, re-reads). Good for 'continue reading' + statistics."
+      },
+      {
+        "key": "d",
+        "label": "Multiple bookmarks",
+        "description": "Users can save multiple positions per file. Like browser bookmarks. More features, more UI complexity."
+      }
+    ]
+  },
+  {
+    "id": 12,
+    "category": "Deployment & Integration",
+    "title": "Deployment Environment and Hosting",
+    "context": "You mentioned the app 'will be hosted somewhere'.\n\nThis affects:\n- Build process and packaging\n- Database path configuration (SQLite file location)\n- File storage paths\n- Environment variable management\n- CORS configuration",
+    "ambiguity": "What's the target deployment environment?",
+    "question": "Where and how will this application be deployed?",
+    "options": [
+      {
+        "key": "a",
+        "label": "Single server (VM/VPS)",
+        "description": "Deploy both frontend and backend on one server. Frontend built and served by Spring Boot or Nginx. Simple, traditional approach. Good for MVP."
+      },
+      {
+        "key": "b",
+        "label": "Docker containers",
+        "description": "Containerized backend + frontend. Can run on any container platform (Docker Compose, Kubernetes, cloud). Portable, reproducible."
+      },
+      {
+        "key": "c",
+        "label": "Separate hosting",
+        "description": "Frontend on Vercel/Netlify, backend on Heroku/Railway/cloud VM. Easier CI/CD, but requires CORS setup and more configuration."
+      },
+      {
+        "key": "d",
+        "label": "Cloud platform (AWS/GCP/Azure)",
+        "description": "Full cloud deployment with managed services. Scalable, professional, but more complex and potentially costly. Overkill for MVP."
+      }
+    ]
+  }
+]

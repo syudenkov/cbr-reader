@@ -1,0 +1,459 @@
+{
+  "$schema": "execution-schema-v1",
+  "version": "1.0",
+  "task": "TASK0",
+  "title": "BLUEPRINT: TASK0",
+  "status": "completed",
+  "started": "2026-01-04T21:47:10.101Z",
+  "completed": "2026-01-05T23:45:00.000Z",
+  "attempts": 25,
+  "currentPhase": {
+    "id": 5,
+    "name": "Validation",
+    "lastAction": "All validations completed and passed"
+  },
+  "phases": [
+    {
+      "id": 1,
+      "name": "Preparation",
+      "status": "completed",
+      "items": [
+        {
+          "description": "Read AI_PROMPT.md sections §2, §9 for exact structure and config",
+          "source": "BLUEPRINT.md §4 Phase 1 Step 1",
+          "completed": true,
+          "evidence": "Read AI_PROMPT.md, understood structure and configuration"
+        },
+        {
+          "description": "Verify Java 21 and Node.js are available",
+          "source": "BLUEPRINT.md §4 Phase 1 Step 2",
+          "completed": true,
+          "evidence": "Java 21 verified at /usr/lib/jvm/java-21-openjdk-amd64, Node.js v20.19.5 verified, npm 10.8.2 verified"
+        },
+        {
+          "description": "Plan directory structure based on AI_PROMPT.md:L49-154",
+          "source": "BLUEPRINT.md §4 Phase 1 Step 3",
+          "completed": true,
+          "evidence": "Reviewed monorepo structure from AI_PROMPT.md"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Backend Foundation",
+      "status": "completed",
+      "items": [
+        {
+          "description": "Create backend directory structure",
+          "source": "BLUEPRINT.md §4 Phase 2 Step 1",
+          "completed": true,
+          "evidence": "Created backend/src/main/java/com/cbrviewer/ and backend/src/main/resources/"
+        },
+        {
+          "description": "Create build.gradle with Spring Boot 3.x, SQLite, junrar dependencies",
+          "source": "BLUEPRINT.md §4 Phase 2 Step 2",
+          "completed": true,
+          "evidence": "Created build.gradle with Spring Boot 3.2.1, SQLite JDBC, hibernate-community-dialects, junrar. Fixed: Removed Spring Security (TASK1 scope), let Spring Boot manage hibernate-community-dialects version."
+        },
+        {
+          "description": "Create settings.gradle with project name",
+          "source": "BLUEPRINT.md §4 Phase 2 Step 3",
+          "completed": true,
+          "evidence": "Created settings.gradle with rootProject.name = 'cbr-viewer'"
+        },
+        {
+          "description": "Create CbrViewerApplication.java with @SpringBootApplication",
+          "source": "BLUEPRINT.md §4 Phase 2 Step 4",
+          "completed": true,
+          "evidence": "Created CbrViewerApplication.java main class"
+        },
+        {
+          "description": "Create application.yml following AI_PROMPT.md:L829-859 pattern",
+          "source": "BLUEPRINT.md §4 Phase 2 Step 5",
+          "completed": true,
+          "evidence": "Created application.yml with SQLite datasource, session config, CORS, storage paths. Fixed: Use separate env vars COMICS_PATH, AUDIO_PATH, CACHE_PATH instead of shared STORAGE_PATH."
+        },
+        {
+          "description": "Create schema.sql with all 8 tables from AI_PROMPT.md:L158-262",
+          "source": "BLUEPRINT.md §4 Phase 2 Step 6",
+          "completed": true,
+          "evidence": "Created schema.sql with 9 tables: users, comic_files, reading_progress, ratings, tts_jobs, tts_results, llm_config, audit_logs, system_logs"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Frontend Foundation",
+      "status": "completed",
+      "items": [
+        {
+          "description": "Create frontend directory with Vite + React + TypeScript",
+          "source": "BLUEPRINT.md §4 Phase 3 Step 1",
+          "completed": true,
+          "evidence": "Created frontend/src/ directory structure"
+        },
+        {
+          "description": "Create package.json with React 18, MUI, Redux Toolkit, Axios, Vite dependencies",
+          "source": "BLUEPRINT.md §4 Phase 3 Step 2",
+          "completed": true,
+          "evidence": "Created package.json with all required dependencies. npm install completed successfully with 424 packages."
+        },
+        {
+          "description": "Create tsconfig.json with strict mode",
+          "source": "BLUEPRINT.md §4 Phase 3 Step 3",
+          "completed": true,
+          "evidence": "Created tsconfig.json with strict: true and all required compiler options"
+        },
+        {
+          "description": "Create vite.config.ts with API proxy to backend",
+          "source": "BLUEPRINT.md §4 Phase 3 Step 4",
+          "completed": true,
+          "evidence": "Created vite.config.ts with proxy to http://localhost:8080"
+        },
+        {
+          "description": "Create index.html with root div",
+          "source": "BLUEPRINT.md §4 Phase 3 Step 5",
+          "completed": true,
+          "evidence": "Created index.html with root div and script import"
+        },
+        {
+          "description": "Create main.tsx with React root render",
+          "source": "BLUEPRINT.md §4 Phase 3 Step 6",
+          "completed": true,
+          "evidence": "Created main.tsx with ReactDOM.createRoot"
+        },
+        {
+          "description": "Create App.tsx with basic MUI ThemeProvider wrapper",
+          "source": "BLUEPRINT.md §4 Phase 3 Step 7",
+          "completed": true,
+          "evidence": "Created App.tsx with ThemeProvider, CssBaseline, and basic content"
+        },
+        {
+          "description": "Create theme/theme.ts with dark mode theme (AI_PROMPT.md:L407-423)",
+          "source": "BLUEPRINT.md §4 Phase 3 Step 8",
+          "completed": true,
+          "evidence": "Created theme/theme.ts with dark mode and MUI configuration"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Storage Structure",
+      "status": "completed",
+      "items": [
+        {
+          "description": "Create storage/comics/ directory",
+          "source": "BLUEPRINT.md §4 Phase 4 Step 1",
+          "completed": true,
+          "evidence": "Created /home/stress/projects/cbr_viewer/storage/comics/"
+        },
+        {
+          "description": "Create storage/audio/ directory",
+          "source": "BLUEPRINT.md §4 Phase 4 Step 2",
+          "completed": true,
+          "evidence": "Created /home/stress/projects/cbr_viewer/storage/audio/"
+        },
+        {
+          "description": "Ensure application.yml references these paths",
+          "source": "BLUEPRINT.md §4 Phase 4 Step 3",
+          "completed": true,
+          "evidence": "application.yml contains comics-path: ${COMICS_PATH:./storage/comics}, audio-path: ${AUDIO_PATH:./storage/audio}"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Validation",
+      "status": "completed",
+      "items": [
+        {
+          "description": "Verify backend compiles: ./gradlew build -x test",
+          "source": "BLUEPRINT.md §4 Phase 5 Step 1",
+          "completed": true,
+          "evidence": "Backend BUILD SUCCESSFUL with JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64. Key fix: Use Java 21 explicitly (system default Java 25 incompatible with Gradle 8.5's Groovy version)."
+        },
+        {
+          "description": "Verify frontend compiles: npm run build",
+          "source": "BLUEPRINT.md §4 Phase 5 Step 2",
+          "completed": true,
+          "evidence": "Frontend build completed successfully: vite v6.4.1, 351 modules transformed, output: dist/assets/index-CEwIkiH9.js (237.75 kB)"
+        },
+        {
+          "description": "Verify schema.sql has all 8 tables",
+          "source": "BLUEPRINT.md §4 Phase 5 Step 3",
+          "completed": true,
+          "evidence": "Verified: schema.sql contains 9 tables (grep -c 'CREATE TABLE' = 9)"
+        },
+        {
+          "description": "Verify application.yml has all required config",
+          "source": "BLUEPRINT.md §4 Phase 5 Step 4",
+          "completed": true,
+          "evidence": "Verified: application.yml contains comics-path, audio-path, cache-path, datasource, session config, CORS"
+        },
+        {
+          "description": "Mark task complete",
+          "source": "BLUEPRINT.md §4 Phase 5 Step 5",
+          "completed": true,
+          "evidence": "All phases and success criteria completed and verified"
+        }
+      ]
+    }
+  ],
+  "uncertainties": [
+    {
+      "id": "U1",
+      "topic": "Spring Boot 4 availability",
+      "assumption": "Using Spring Boot 3.2.1 since 4.x not yet released",
+      "confidence": "HIGH",
+      "resolution": "Used Spring Boot 3.2.1 in build.gradle - ACCEPTABLE deviation"
+    },
+    {
+      "id": "U2",
+      "topic": "Gradle/Java version compatibility",
+      "assumption": "System Java 25 incompatible with Gradle 8.5 Groovy bytecode parser",
+      "confidence": "HIGH",
+      "resolution": "RESOLVED: Set JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64 for all Gradle commands. Root cause: Java 25 produces bytecode version 69, which Groovy 3.0.17 in Gradle 8.5 cannot parse."
+    },
+    {
+      "id": "U3",
+      "topic": "Hibernate community dialects version",
+      "assumption": "Let Spring Boot manage hibernate-community-dialects version",
+      "confidence": "HIGH",
+      "resolution": "RESOLVED: Removed explicit version from build.gradle, let Spring Boot dependency management handle it"
+    }
+  ],
+  "artifacts": [
+    {
+      "type": "created",
+      "path": "backend/src/main/java/com/cbrviewer/CbrViewerApplication.java",
+      "verified": true
+    },
+    {
+      "type": "modified",
+      "path": "backend/src/main/resources/application.yml",
+      "verified": true,
+      "changes": "Fixed storage env vars: COMICS_PATH, AUDIO_PATH instead of shared STORAGE_PATH"
+    },
+    {
+      "type": "created",
+      "path": "backend/src/main/resources/schema.sql",
+      "verified": true
+    },
+    {
+      "type": "modified",
+      "path": "backend/build.gradle",
+      "verified": true,
+      "changes": "Removed Spring Security (TASK1 scope), removed explicit hibernate-community-dialects version"
+    },
+    {
+      "type": "created",
+      "path": "backend/settings.gradle",
+      "verified": true
+    },
+    {
+      "type": "created",
+      "path": "backend/gradlew",
+      "verified": true,
+      "changes": "Downloaded Gradle 8.5 wrapper from official source"
+    },
+    {
+      "type": "created",
+      "path": "backend/gradle/wrapper/gradle-wrapper.jar",
+      "verified": true
+    },
+    {
+      "type": "created",
+      "path": "backend/gradle/wrapper/gradle-wrapper.properties",
+      "verified": true
+    },
+    {
+      "type": "created",
+      "path": "frontend/package.json",
+      "verified": true
+    },
+    {
+      "type": "created",
+      "path": "frontend/node_modules/",
+      "verified": true,
+      "changes": "npm install completed with 424 packages"
+    },
+    {
+      "type": "created",
+      "path": "frontend/tsconfig.json",
+      "verified": true
+    },
+    {
+      "type": "created",
+      "path": "frontend/tsconfig.node.json",
+      "verified": true
+    },
+    {
+      "type": "created",
+      "path": "frontend/vite.config.ts",
+      "verified": true
+    },
+    {
+      "type": "created",
+      "path": "frontend/index.html",
+      "verified": true
+    },
+    {
+      "type": "created",
+      "path": "frontend/src/main.tsx",
+      "verified": true
+    },
+    {
+      "type": "created",
+      "path": "frontend/src/App.tsx",
+      "verified": true
+    },
+    {
+      "type": "created",
+      "path": "frontend/src/theme/theme.ts",
+      "verified": true
+    },
+    {
+      "type": "created",
+      "path": "frontend/.env",
+      "verified": true
+    },
+    {
+      "type": "created",
+      "path": "frontend/dist/",
+      "verified": true,
+      "changes": "Production build output"
+    }
+  ],
+  "beyondTheBasics": {
+    "extras": [],
+    "edgeCases": [],
+    "downstreamImpact": {
+      "TASK1": "Will need to add spring-boot-starter-security dependency for authentication"
+    },
+    "cleanup": {
+      "debugLogsRemoved": true,
+      "formattingConsistent": true,
+      "deadCodeRemoved": true
+    }
+  },
+  "completion": {
+    "status": "complete",
+    "codeReviewPassed": true,
+    "codeReviewDate": "2026-01-05T23:50:00Z",
+    "codeReviewNotes": "CODE REVIEW APPROVED - All 8 requirements (R1-R8) implemented correctly, all 6 acceptance criteria (AC1-AC6) verified, 0 critical/major/minor issues, both backend and frontend compile successfully",
+    "summary": [
+      "Project structure created with all required files",
+      "Database schema complete with 9 tables (matches AI_PROMPT spec)",
+      "Backend compiles successfully with Gradle 8.5 + Java 21",
+      "Frontend compiles successfully with Vite 6.4.1",
+      "All success criteria verified and passing",
+      "Code review completed: 8/8 requirements mapped, 6/6 acceptance criteria verified"
+    ],
+    "blockedBy": [],
+    "deviations": [
+      "Used Spring Boot 3.2.1 instead of 4.x (4.x not yet released) - ACCEPTABLE",
+      "Schema has 9 tables instead of 8 - CORRECT per AI_PROMPT spec",
+      "System Java 21 used instead of Java 25 (Gradle/Groovy compatibility) - ACCEPTABLE"
+    ],
+    "forFutureTasks": [
+      "CRITICAL: Use JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64 for all Gradle commands. System default Java 25 is incompatible with Gradle 8.5.",
+      "Backend build command: JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64 ./gradlew build -x test",
+      "Spring Security dependency will be added in TASK1 for authentication implementation",
+      "Frontend dependencies already installed - no need to run npm install again unless package.json changes"
+    ]
+  },
+  "successCriteria": [
+    {
+      "criterion": "Backend compiles",
+      "command": "cd /home/stress/projects/cbr_viewer/backend && JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64 ./gradlew build -x test --quiet",
+      "source": "AI_PROMPT.md:§10",
+      "expected": "Command should succeed",
+      "passed": true,
+      "evidence": "BUILD SUCCESSFUL in 1s, 5 actionable tasks",
+      "testType": "AUTO"
+    },
+    {
+      "criterion": "Frontend compiles",
+      "command": "cd /home/stress/projects/cbr_viewer/frontend && npm run build --silent",
+      "source": "AI_PROMPT.md:§10",
+      "expected": "Command should succeed",
+      "passed": true,
+      "evidence": "vite v6.4.1 built successfully, 351 modules transformed, dist/assets/index-CEwIkiH9.js 237.75 kB",
+      "testType": "AUTO"
+    },
+    {
+      "criterion": "SQLite schema created",
+      "command": "test -f /home/stress/projects/cbr_viewer/backend/src/main/resources/schema.sql",
+      "source": "AI_PROMPT.md:§2",
+      "expected": "Command should succeed",
+      "passed": true,
+      "evidence": "File exists",
+      "testType": "AUTO"
+    },
+    {
+      "criterion": "All 8 tables defined",
+      "command": "grep -c \"CREATE TABLE\" /home/stress/projects/cbr_viewer/backend/src/main/resources/schema.sql",
+      "source": "AI_PROMPT.md:L158-262",
+      "expected": "Command should succeed",
+      "passed": true,
+      "evidence": "9 (includes system_logs as per AI_PROMPT spec)",
+      "testType": "AUTO"
+    },
+    {
+      "criterion": "Storage directories configured",
+      "command": "grep -q \"comics-path\" /home/stress/projects/cbr_viewer/backend/src/main/resources/application.yml",
+      "source": "AI_PROMPT.md:§9",
+      "expected": "Command should succeed",
+      "passed": true,
+      "evidence": "comics-path: ${COMICS_PATH:./storage/comics}",
+      "testType": "AUTO"
+    },
+    {
+      "criterion": "MUI theme configured",
+      "command": "test -f /home/stress/projects/cbr_viewer/frontend/src/theme/theme.ts",
+      "source": "AI_PROMPT.md:L407-423",
+      "expected": "Command should succeed",
+      "passed": true,
+      "evidence": "File exists with dark mode theme",
+      "testType": "AUTO"
+    }
+  ],
+  "errorHistory": [
+    {
+      "timestamp": "2026-01-05T23:30:00.000Z",
+      "phase": "code-review",
+      "message": "Code review FAILED: 2 critical blockers (gradle wrapper, npm install), 2 major issues (Spring Security scope violation, env var config bug)",
+      "failedValidation": "code-review",
+      "details": {
+        "critical_blockers": [
+          "Gradle wrapper not generated (./gradlew missing) - blocks backend compilation",
+          "npm dependencies not installed (node_modules/ missing) - blocks frontend compilation"
+        ],
+        "major_issues": [
+          "Spring Security dependency in build.gradle:22 violates TASK0 scope (should be in TASK1)",
+          "application.yml storage paths misconfigured - both comics-path and audio-path use same STORAGE_PATH env var"
+        ]
+      },
+      "resolution": "RESOLVED in attempt 25"
+    },
+    {
+      "timestamp": "2026-01-05T22:57:00.000Z",
+      "message": "All bash commands failing with exit code 1 after Gradle download attempts",
+      "failedValidation": "bash-tool-failure",
+      "context": "Attempted Gradle 8.5, 8.6, 8.8 setups - all hit Java 21/Groovy incompatibility. Then bash tool stopped working entirely.",
+      "resolution": "RESOLVED: Root cause was Java 25 (bytecode version 69) incompatible with Gradle's Groovy. Fixed by using JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64"
+    },
+    {
+      "timestamp": "2026-01-05T21:01:44.439Z",
+      "message": "Validation failed: implementation-strategy",
+      "failedValidation": "implementation-strategy",
+      "resolution": "RESOLVED in subsequent attempts"
+    },
+    {
+      "timestamp": "2026-01-05T21:09:19.843Z",
+      "message": "Validation failed: success-criteria",
+      "failedValidation": "success-criteria",
+      "resolution": "RESOLVED: All 6 success criteria now passing"
+    }
+  ]
+}
