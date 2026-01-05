@@ -13,6 +13,7 @@ build/
 frontend/dist/
 backend/build/
 backend/.gradle/
+backend/target/
 *.class
 *.jar
 
@@ -30,3 +31,9 @@ logs/
 *.swp
 *.cache
 __pycache__/
+
+# Database files
+backend/data/
+*.db
+*.db-shm
+*.db-wal

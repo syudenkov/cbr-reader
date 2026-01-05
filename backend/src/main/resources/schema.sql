@@ -1,5 +1,5 @@
 -- Users table
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT UNIQUE NOT NULL,
     email TEXT UNIQUE NOT NULL,
@@ -10,7 +10,7 @@ CREATE TABLE users (
 );
 
 -- Comic files metadata
-CREATE TABLE comic_files (
+CREATE TABLE IF NOT EXISTS comic_files (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     filename TEXT NOT NULL,
     original_filename TEXT NOT NULL,
@@ -25,7 +25,7 @@ CREATE TABLE comic_files (
 );
 
 -- User reading progress (last page only)
-CREATE TABLE reading_progress (
+CREATE TABLE IF NOT EXISTS reading_progress (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL REFERENCES users(id),
     file_id INTEGER NOT NULL REFERENCES comic_files(id),
@@ -35,7 +35,7 @@ CREATE TABLE reading_progress (
 );
 
 -- User ratings
-CREATE TABLE ratings (
+CREATE TABLE IF NOT EXISTS ratings (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL REFERENCES users(id),
     file_id INTEGER NOT NULL REFERENCES comic_files(id),
@@ -45,7 +45,7 @@ CREATE TABLE ratings (
 );
 
 -- TTS processing jobs
-CREATE TABLE tts_jobs (
+CREATE TABLE IF NOT EXISTS tts_jobs (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     file_id INTEGER NOT NULL REFERENCES comic_files(id),
     requested_by INTEGER NOT NULL REFERENCES users(id),
@@ -58,7 +58,7 @@ CREATE TABLE tts_jobs (
 );
 
 -- TTS results stored as JSON in SQLite
-CREATE TABLE tts_results (
+CREATE TABLE IF NOT EXISTS tts_results (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     file_id INTEGER NOT NULL REFERENCES comic_files(id),
     page_number INTEGER NOT NULL,
@@ -70,7 +70,7 @@ CREATE TABLE tts_results (
 );
 
 -- LLM Configuration (admin-managed)
-CREATE TABLE llm_config (
+CREATE TABLE IF NOT EXISTS llm_config (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     provider TEXT NOT NULL, -- 'openai', 'claude', 'minimax'
     api_key_encrypted TEXT NOT NULL,
@@ -82,7 +82,7 @@ CREATE TABLE llm_config (
 );
 
 -- Audit logs
-CREATE TABLE audit_logs (
+CREATE TABLE IF NOT EXISTS audit_logs (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER REFERENCES users(id),
     action TEXT NOT NULL,
@@ -94,7 +94,7 @@ CREATE TABLE audit_logs (
 );
 
 -- System logs
-CREATE TABLE system_logs (
+CREATE TABLE IF NOT EXISTS system_logs (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     level TEXT NOT NULL, -- INFO, WARN, ERROR
     message TEXT NOT NULL,

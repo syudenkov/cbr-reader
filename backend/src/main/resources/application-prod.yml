@@ -1,0 +1,57 @@
+# Production Profile Configuration
+
+spring:
+  # Database initialization
+  sql:
+    init:
+      mode: never  # Don't auto-create schema in production
+
+  # JPA/Hibernate settings
+  jpa:
+    show-sql: false  # Disable SQL logging in production
+    hibernate:
+      ddl-auto: none  # Don't validate schema (SQLite INTEGER vs BIGINT compatibility)
+    properties:
+      hibernate:
+        format_sql: false
+        use_sql_comments: false
+    database-platform: org.hibernate.community.dialect.SQLiteDialect
+
+  # Session configuration
+  servlet:
+    session:
+      cookie:
+        secure: true  # Require HTTPS in production
+
+# Server configuration
+server:
+  error:
+    include-message: never
+    include-stacktrace: never
+    include-binding-errors: never
+  shutdown: graceful
+
+# Management endpoints
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when-authorized
+
+# Logging configuration
+logging:
+  level:
+    root: WARN
+    com.cbrviewer: INFO
+    org.springframework.security: WARN
+    org.springframework.web: WARN
+    org.hibernate: WARN
+  file:
+    name: logs/cbr-viewer.log
+    max-size: 10MB
+    max-history: 30
+  pattern:
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
