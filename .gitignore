@@ -1,0 +1,32 @@
+# CodeMachine / Claudiomiro - ignore all agent/task files
+.codemachine/
+.claudiomiro/
+
+# Dependencies
+node_modules/
+frontend/node_modules/
+backend/node_modules/
+
+# Build artifacts
+dist/
+build/
+frontend/dist/
+backend/build/
+backend/.gradle/
+*.class
+*.jar
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.swp
+*.cache
+__pycache__/
