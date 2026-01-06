@@ -34,5 +34,9 @@ app:
     comics-path: ${COMICS_PATH:./storage/comics}
     audio-path: ${AUDIO_PATH:./storage/audio}
     cache-path: ${CACHE_PATH:./storage/cache}
+  cache:
+    max-size-mb: 100
+    ttl-days: 20
+    cleanup-cron: "0 0 2 * * *"
   cors:
     allowed-origins: ${CORS_ORIGINS:http://localhost:5173}
