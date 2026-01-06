@@ -7,6 +7,7 @@ import { useAppDispatch, useAppSelector } from './store/hooks';
 import { fetchCurrentUser } from './store/slices/authSlice';
 import LoginPage from './pages/LoginPage';
 import LibraryPage from './pages/LibraryPage';
+import { ViewerPage } from './pages/ViewerPage';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 
 function App() {
@@ -29,6 +30,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <LibraryPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/viewer/:fileId"
+            element={
+              <ProtectedRoute>
+                <ViewerPage />
               </ProtectedRoute>
             }
           />
