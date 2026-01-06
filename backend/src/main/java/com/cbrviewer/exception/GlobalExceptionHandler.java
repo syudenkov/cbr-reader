@@ -31,6 +31,27 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
     }
 
+    @ExceptionHandler(InvalidArchiveException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidArchive(InvalidArchiveException ex) {
+        logger.warn("Invalid archive: {}", ex.getMessage());
+        ErrorResponse error = new ErrorResponse("Invalid Archive", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex) {
+        logger.warn("Illegal argument: {}", ex.getMessage());
+        ErrorResponse error = new ErrorResponse("Not Found", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAccessDenied(org.springframework.security.access.AccessDeniedException ex) {
+        logger.warn("Access denied: {}", ex.getMessage());
+        ErrorResponse error = new ErrorResponse("Forbidden", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
