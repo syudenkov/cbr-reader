@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Box, CircularProgress, Alert, Button } from '@mui/material';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
@@ -10,6 +10,8 @@ import {
   toggleFullscreen,
   clearPreloadedPages,
   resetViewer,
+  fetchReadingProgress,
+  updateReadingProgress,
 } from '../store/slices/viewerSlice';
 import { ViewerToolbar } from '../components/viewer/ViewerToolbar';
 import { PageRenderer } from '../components/viewer/PageRenderer';
@@ -31,8 +33,12 @@ export const ViewerPage = () => {
     zoomLevel,
     preloadedPages,
     fileLoadingStatus,
+    progressLoadingStatus,
     error,
   } = useAppSelector((state) => state.viewer);
+
+  // Debounce timer ref
+  const progressUpdateTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Fetch file metadata on mount
   useEffect(() => {
@@ -42,6 +48,10 @@ export const ViewerPage = () => {
 
     // Cleanup on unmount
     return () => {
+      // Clear debounce timer
+      if (progressUpdateTimerRef.current) {
+        clearTimeout(progressUpdateTimerRef.current);
+      }
       // Revoke all blob URLs to prevent memory leaks
       Object.values(preloadedPages).forEach((url) => {
         URL.revokeObjectURL(url);
@@ -49,7 +59,36 @@ export const ViewerPage = () => {
       dispatch(clearPreloadedPages());
       dispatch(resetViewer());
     };
-  }, [fileId, dispatch]);
+  }, [fileId, dispatch, preloadedPages]);
+
+  // Fetch reading progress after file metadata is loaded
+  useEffect(() => {
+    if (fileId && fileLoadingStatus === 'succeeded' && progressLoadingStatus === 'idle') {
+      dispatch(fetchReadingProgress(Number(fileId)));
+    }
+  }, [fileId, fileLoadingStatus, progressLoadingStatus, dispatch]);
+
+  // Update reading progress when page changes (debounced 2 seconds)
+  useEffect(() => {
+    if (fileId && currentPage > 0 && progressLoadingStatus !== 'loading') {
+      // Clear existing timer
+      if (progressUpdateTimerRef.current) {
+        clearTimeout(progressUpdateTimerRef.current);
+      }
+
+      // Set new timer to update progress after 2 seconds
+      progressUpdateTimerRef.current = setTimeout(() => {
+        dispatch(updateReadingProgress({ fileId: Number(fileId), currentPage }));
+      }, 2000);
+    }
+
+    return () => {
+      // Clear timer on cleanup
+      if (progressUpdateTimerRef.current) {
+        clearTimeout(progressUpdateTimerRef.current);
+      }
+    };
+  }, [fileId, currentPage, progressLoadingStatus, dispatch]);
 
   // Load current page when it changes
   useEffect(() => {

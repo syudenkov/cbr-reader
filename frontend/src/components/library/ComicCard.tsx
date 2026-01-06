@@ -11,11 +11,13 @@ import {
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { ComicFile } from '../../services/fileService';
+import ProgressBadge from './ProgressBadge';
 
 interface ComicCardProps {
   file: ComicFile;
   onOpen: (fileId: number) => void;
   onDelete?: (file: ComicFile) => void;
+  currentPage?: number;
 }
 
 /**
@@ -40,7 +42,7 @@ const formatDate = (isoString: string): string => {
   });
 };
 
-const ComicCard: React.FC<ComicCardProps> = ({ file, onOpen, onDelete }) => {
+const ComicCard: React.FC<ComicCardProps> = ({ file, onOpen, onDelete, currentPage }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
 
@@ -79,6 +81,9 @@ const ComicCard: React.FC<ComicCardProps> = ({ file, onOpen, onDelete }) => {
     >
       {/* Cover Image */}
       <Box sx={{ position: 'relative', paddingTop: '133.33%', bgcolor: 'grey.900' }}>
+        {currentPage && currentPage > 1 && (
+          <ProgressBadge currentPage={currentPage} totalPages={file.pageCount} />
+        )}
         {!imageLoaded && !imageError && (
           <Skeleton
             variant="rectangular"

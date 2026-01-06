@@ -24,6 +24,7 @@ import { ComicFile } from '../services/fileService';
 import ComicCard from '../components/library/ComicCard';
 import UploadDialog from '../components/library/UploadDialog';
 import DeleteConfirmDialog from '../components/library/DeleteConfirmDialog';
+import * as progressService from '../services/progressService';
 
 const LibraryPage: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -38,11 +39,32 @@ const LibraryPage: React.FC = () => {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
+  const [progressMap, setProgressMap] = useState<Record<number, number>>({});
 
   // Fetch files on mount
   useEffect(() => {
     dispatch(fetchFiles());
   }, [dispatch]);
+
+  // Fetch reading progress after files are loaded
+  useEffect(() => {
+    const fetchProgress = async () => {
+      if (status === 'succeeded' && comics.length > 0) {
+        try {
+          const progressList = await progressService.getAllProgress();
+          const map: Record<number, number> = {};
+          progressList.forEach((progress) => {
+            map[progress.fileId] = progress.currentPage;
+          });
+          setProgressMap(map);
+        } catch (error) {
+          // Silently fail - progress is not critical
+          console.error('Failed to fetch reading progress:', error);
+        }
+      }
+    };
+    fetchProgress();
+  }, [status, comics.length]);
 
   // Handle upload success
   useEffect(() => {
@@ -189,6 +211,7 @@ const LibraryPage: React.FC = () => {
                     file={comic}
                     onOpen={handleOpenComic}
                     onDelete={handleDeleteClick}
+                    currentPage={progressMap[comic.id]}
                   />
                 </Grid>
               ))}

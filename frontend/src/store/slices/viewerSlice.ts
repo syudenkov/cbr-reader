@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import * as viewerService from '../../services/viewerService';
+import * as progressService from '../../services/progressService';
 import type { ComicFile } from '../../services/viewerService';
 import type { RootState } from '../store';
 
@@ -22,6 +23,7 @@ interface ViewerState {
   // Loading states
   pageLoadingStatus: 'idle' | 'loading' | 'succeeded' | 'failed';
   fileLoadingStatus: 'idle' | 'loading' | 'succeeded' | 'failed';
+  progressLoadingStatus: 'idle' | 'loading' | 'succeeded' | 'failed';
   error: string | null;
 }
 
@@ -35,6 +37,7 @@ const initialState: ViewerState = {
   preloadedPages: {},
   pageLoadingStatus: 'idle',
   fileLoadingStatus: 'idle',
+  progressLoadingStatus: 'idle',
   error: null,
 };
 
@@ -71,6 +74,32 @@ export const preloadPage = createAsyncThunk(
     } catch (error) {
       const axiosError = error as { response?: { data?: { message?: string } } };
       return rejectWithValue(axiosError.response?.data?.message || 'Failed to load page');
+    }
+  }
+);
+
+export const fetchReadingProgress = createAsyncThunk(
+  'viewer/fetchReadingProgress',
+  async (fileId: number, { rejectWithValue }) => {
+    try {
+      const progress = await progressService.getProgress(fileId);
+      return progress;
+    } catch (error) {
+      const axiosError = error as { response?: { data?: { message?: string } } };
+      return rejectWithValue(axiosError.response?.data?.message || 'Failed to load reading progress');
+    }
+  }
+);
+
+export const updateReadingProgress = createAsyncThunk(
+  'viewer/updateReadingProgress',
+  async ({ fileId, currentPage }: { fileId: number; currentPage: number }, { rejectWithValue }) => {
+    try {
+      const progress = await progressService.updateProgress(fileId, currentPage);
+      return progress;
+    } catch (error) {
+      const axiosError = error as { response?: { data?: { message?: string } } };
+      return rejectWithValue(axiosError.response?.data?.message || 'Failed to update reading progress');
     }
   }
 );
@@ -134,6 +163,26 @@ const viewerSlice = createSlice({
       .addCase(preloadPage.rejected, (state, action) => {
         state.pageLoadingStatus = 'failed';
         state.error = action.payload as string;
+      })
+      // fetchReadingProgress
+      .addCase(fetchReadingProgress.pending, (state) => {
+        state.progressLoadingStatus = 'loading';
+      })
+      .addCase(fetchReadingProgress.fulfilled, (state, action) => {
+        state.progressLoadingStatus = 'succeeded';
+        // Restore the last read page
+        state.currentPage = action.payload.currentPage;
+      })
+      .addCase(fetchReadingProgress.rejected, (state) => {
+        state.progressLoadingStatus = 'failed';
+        // Don't set error for progress fetch failure (not critical)
+      })
+      // updateReadingProgress (silent - no loading state changes)
+      .addCase(updateReadingProgress.fulfilled, () => {
+        // Progress update succeeded silently
+      })
+      .addCase(updateReadingProgress.rejected, () => {
+        // Progress update failed silently (not critical)
       });
   },
 });
