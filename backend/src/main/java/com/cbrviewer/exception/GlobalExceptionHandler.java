@@ -59,6 +59,27 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(error);
     }
 
+    @ExceptionHandler(LlmConfigNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleLlmConfigNotFound(LlmConfigNotFoundException ex) {
+        logger.warn("LLM config not found: {}", ex.getMessage());
+        ErrorResponse error = new ErrorResponse("Not Found", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler(InvalidApiKeyException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidApiKey(InvalidApiKeyException ex) {
+        logger.warn("Invalid API key: {}", ex.getMessage());
+        ErrorResponse error = new ErrorResponse("Bad Request", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    @ExceptionHandler(LlmConfigTestException.class)
+    public ResponseEntity<ErrorResponse> handleLlmConfigTest(LlmConfigTestException ex) {
+        logger.error("LLM config test failed: {}", ex.getMessage());
+        ErrorResponse error = new ErrorResponse("Internal Server Error", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+    }
+
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex) {
         logger.warn("Illegal argument: {}", ex.getMessage());

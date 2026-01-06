@@ -30,6 +30,22 @@ public class OpenAiConfig {
     }
 
     /**
+     * Creates a default RestTemplate configured with 30-second timeout for general use.
+     *
+     * @return configured RestTemplate instance
+     */
+    @Bean
+    public RestTemplate restTemplate() {
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(30000); // 30 seconds in milliseconds
+        factory.setReadTimeout(30000);    // 30 seconds in milliseconds
+
+        RestTemplate restTemplate = new RestTemplate(factory);
+        logger.info("Default RestTemplate configured with 30-second timeout");
+        return restTemplate;
+    }
+
+    /**
      * Creates a RestTemplate configured with 30-second timeout for OpenAI API calls.
      *
      * @return configured RestTemplate instance

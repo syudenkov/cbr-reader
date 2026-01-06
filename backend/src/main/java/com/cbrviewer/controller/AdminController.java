@@ -1,10 +1,8 @@
 package com.cbrviewer.controller;
 
-import com.cbrviewer.dto.AuditLogDto;
-import com.cbrviewer.dto.UserCreateRequest;
-import com.cbrviewer.dto.UserResponse;
-import com.cbrviewer.dto.UserUpdateRequest;
+import com.cbrviewer.dto.*;
 import com.cbrviewer.exception.InvalidCredentialsException;
+import com.cbrviewer.service.LlmConfigService;
 import com.cbrviewer.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
@@ -24,9 +22,11 @@ import java.util.Map;
 public class AdminController {
 
     private final UserService userService;
+    private final LlmConfigService llmConfigService;
 
-    public AdminController(UserService userService) {
+    public AdminController(UserService userService, LlmConfigService llmConfigService) {
         this.userService = userService;
+        this.llmConfigService = llmConfigService;
     }
 
     private Long getCurrentUserId(HttpSession session) {
@@ -110,5 +110,34 @@ public class AdminController {
     public ResponseEntity<List<AuditLogDto>> getUserActivity(@PathVariable Long id) {
         List<AuditLogDto> activity = userService.getUserActivity(id);
         return ResponseEntity.ok(activity);
+    }
+
+    // LLM Configuration Management Endpoints
+
+    @GetMapping("/llm-config")
+    public ResponseEntity<List<LlmConfigDto>> getAllLlmConfigs() {
+        List<LlmConfigDto> configs = llmConfigService.getAllConfigs();
+        return ResponseEntity.ok(configs);
+    }
+
+    @PutMapping("/llm-config/{id}")
+    public ResponseEntity<LlmConfigDto> updateLlmConfig(
+        @PathVariable Long id,
+        @Valid @RequestBody UpdateLlmConfigRequest request,
+        HttpSession session) {
+
+        Long currentAdminId = getCurrentUserId(session);
+        LlmConfigDto updated = llmConfigService.updateConfig(id, request, currentAdminId);
+        return ResponseEntity.ok(updated);
+    }
+
+    @PostMapping("/llm-config/test/{id}")
+    public ResponseEntity<LlmConfigTestResult> testLlmConfig(
+        @PathVariable Long id,
+        HttpSession session) {
+
+        Long currentAdminId = getCurrentUserId(session);
+        LlmConfigTestResult result = llmConfigService.testConfig(id, currentAdminId);
+        return ResponseEntity.ok(result);
     }
 }
