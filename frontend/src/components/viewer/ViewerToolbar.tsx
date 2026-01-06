@@ -5,8 +5,10 @@ import FullscreenIcon from '@mui/icons-material/Fullscreen';
 import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { setFullscreen } from '../../store/slices/viewerSlice';
+import { TtsJobButton } from './TtsJobButton';
 
 interface ViewerToolbarProps {
+  fileId: number;
   title: string | undefined;
   currentPage: number;
   totalPages: number;
@@ -14,9 +16,9 @@ interface ViewerToolbarProps {
 }
 
 /**
- * Top toolbar for the viewer with back button, title, page counter, and fullscreen toggle
+ * Top toolbar for the viewer with back button, title, page counter, TTS button, and fullscreen toggle
  */
-export const ViewerToolbar = ({ title, currentPage, totalPages, onBack }: ViewerToolbarProps) => {
+export const ViewerToolbar = ({ fileId, title, currentPage, totalPages, onBack }: ViewerToolbarProps) => {
   const dispatch = useAppDispatch();
   const isFullscreen = useAppSelector((state) => state.viewer.isFullscreen);
 
@@ -91,10 +93,13 @@ export const ViewerToolbar = ({ title, currentPage, totalPages, onBack }: Viewer
         )}
       </Box>
 
-      {/* Right: Fullscreen toggle */}
-      <IconButton onClick={handleToggleFullscreen} aria-label="Toggle fullscreen" size="large" edge="end">
-        {isFullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}
-      </IconButton>
+      {/* Right: TTS button and Fullscreen toggle */}
+      <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+        <TtsJobButton fileId={fileId} />
+        <IconButton onClick={handleToggleFullscreen} aria-label="Toggle fullscreen" size="large" edge="end">
+          {isFullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}
+        </IconButton>
+      </Box>
     </Box>
   );
 };

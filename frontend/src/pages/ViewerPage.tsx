@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useRef } from 'react';
+import { useEffect, useCallback, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Box, CircularProgress, Alert, Button } from '@mui/material';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
@@ -13,9 +13,11 @@ import {
   fetchReadingProgress,
   updateReadingProgress,
 } from '../store/slices/viewerSlice';
+import { pollJobStatus } from '../store/slices/ttsSlice';
 import { ViewerToolbar } from '../components/viewer/ViewerToolbar';
 import { PageRenderer } from '../components/viewer/PageRenderer';
 import { ViewerControls } from '../components/viewer/ViewerControls';
+import { AudioPlayer } from '../components/viewer/AudioPlayer';
 import { useKeyboardNavigation } from '../hooks/useKeyboardNavigation';
 
 /**
@@ -37,8 +39,15 @@ export const ViewerPage = () => {
     error,
   } = useAppSelector((state) => state.viewer);
 
+  const ttsJob = useAppSelector((state) =>
+    fileId ? state.tts.jobs[Number(fileId)] : null
+  );
+
   // Debounce timer ref
   const progressUpdateTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // TTS polling state
+  const [pollStartTime, setPollStartTime] = useState<number | null>(null);
 
   // Fetch file metadata on mount
   useEffect(() => {
@@ -109,6 +118,37 @@ export const ViewerPage = () => {
       }
     }
   }, [fileId, currentPage, totalPages, preloadedPages, dispatch]);
+
+  // TTS job polling: Poll every 2 seconds while PENDING or PROCESSING
+  useEffect(() => {
+    const jobId = ttsJob?.jobId;
+    const status = ttsJob?.status;
+
+    // Don't poll if no job or job is finished
+    if (!jobId || (status !== 'PENDING' && status !== 'PROCESSING')) {
+      setPollStartTime(null);
+      return;
+    }
+
+    // Set poll start time if not already set
+    if (!pollStartTime) {
+      setPollStartTime(Date.now());
+    }
+
+    // Check if polling timeout exceeded (5 minutes)
+    if (pollStartTime && Date.now() - pollStartTime > 300000) {
+      console.warn('TTS job polling timeout (5 minutes)');
+      setPollStartTime(null);
+      return;
+    }
+
+    // Start polling interval
+    const intervalId = setInterval(() => {
+      dispatch(pollJobStatus(jobId));
+    }, 2000); // Poll every 2 seconds
+
+    return () => clearInterval(intervalId);
+  }, [ttsJob?.jobId, ttsJob?.status, pollStartTime, dispatch]);
 
   // Navigation handlers
   const handlePrevPage = useCallback(() => {
@@ -192,6 +232,9 @@ export const ViewerPage = () => {
   // Get current page URL (from preloaded pages)
   const currentPageUrl = preloadedPages[currentPage];
 
+  // Determine if audio player should be shown
+  const showAudioPlayer = ttsJob?.status === 'COMPLETED';
+
   return (
     <Box
       id="viewer-container"
@@ -203,11 +246,17 @@ export const ViewerPage = () => {
       }}
     >
       <ViewerToolbar
+        fileId={Number(fileId)}
         title={currentFile?.originalFilename}
         currentPage={currentPage}
         totalPages={totalPages}
         onBack={handleBack}
       />
+
+      {/* Audio Player - shown when TTS job is completed */}
+      {showAudioPlayer && fileId && (
+        <AudioPlayer fileId={Number(fileId)} pageNumber={currentPage} />
+      )}
 
       <Box sx={{ flex: 1, overflow: 'auto', position: 'relative' }}>
         <PageRenderer imageUrl={currentPageUrl} zoomLevel={zoomLevel} />
