@@ -1,3 +1,10 @@
+-- SQLite configuration for optimal performance and data integrity
+PRAGMA foreign_keys = ON;           -- Enable referential integrity
+PRAGMA journal_mode = WAL;          -- Write-Ahead Logging for better concurrency
+PRAGMA synchronous = NORMAL;        -- Balance between safety and performance
+PRAGMA cache_size = -64000;         -- 64MB cache (negative value = kibibytes)
+PRAGMA temp_store = MEMORY;         -- Temporary tables in memory
+
 -- Users table
 CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -101,3 +108,47 @@ CREATE TABLE IF NOT EXISTS system_logs (
     stack_trace TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Feature flags for runtime configuration
+CREATE TABLE IF NOT EXISTS feature_flags (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    feature_name TEXT UNIQUE NOT NULL,
+    is_enabled INTEGER DEFAULT 0, -- 0=disabled, 1=enabled
+    description TEXT,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Indexes for query optimization
+-- User lookup by credentials
+CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
+CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+
+-- File browsing and filtering
+CREATE INDEX IF NOT EXISTS idx_comic_files_uploaded_by ON comic_files(uploaded_by);
+CREATE INDEX IF NOT EXISTS idx_comic_files_created_at ON comic_files(created_at DESC);
+
+-- Reading progress lookup
+CREATE INDEX IF NOT EXISTS idx_reading_progress_user_file ON reading_progress(user_id, file_id);
+
+-- Rating aggregation
+CREATE INDEX IF NOT EXISTS idx_ratings_file_id ON ratings(file_id);
+
+-- TTS job status filtering
+CREATE INDEX IF NOT EXISTS idx_tts_jobs_status ON tts_jobs(status);
+CREATE INDEX IF NOT EXISTS idx_tts_jobs_file_id ON tts_jobs(file_id);
+
+-- TTS result page lookup
+CREATE INDEX IF NOT EXISTS idx_tts_results_file_page ON tts_results(file_id, page_number);
+
+-- Audit log filtering
+CREATE INDEX IF NOT EXISTS idx_audit_logs_user_id ON audit_logs(user_id);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_created_at ON audit_logs(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_action ON audit_logs(action);
+
+-- System log filtering
+CREATE INDEX IF NOT EXISTS idx_system_logs_level ON system_logs(level);
+CREATE INDEX IF NOT EXISTS idx_system_logs_created_at ON system_logs(created_at DESC);
+
+-- LLM config lookup
+CREATE INDEX IF NOT EXISTS idx_llm_config_provider ON llm_config(provider);
+CREATE INDEX IF NOT EXISTS idx_llm_config_priority ON llm_config(priority ASC, is_active DESC);
