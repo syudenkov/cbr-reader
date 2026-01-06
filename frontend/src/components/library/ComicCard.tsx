@@ -12,6 +12,7 @@ import {
 import DeleteIcon from '@mui/icons-material/Delete';
 import { ComicFile } from '../../services/fileService';
 import ProgressBadge from './ProgressBadge';
+import RatingWidget from './RatingWidget';
 
 interface ComicCardProps {
   file: ComicFile;
@@ -47,8 +48,9 @@ const ComicCard: React.FC<ComicCardProps> = ({ file, onOpen, onDelete, currentPa
   const [imageError, setImageError] = useState(false);
 
   const handleCardClick = (event: React.MouseEvent) => {
-    // Don't trigger if clicking on action buttons
-    if ((event.target as HTMLElement).closest('.MuiCardActions-root')) {
+    // Don't trigger if clicking on action buttons or rating widget
+    const target = event.target as HTMLElement;
+    if (target.closest('.MuiCardActions-root') || target.closest('.MuiRating-root')) {
       return;
     }
     onOpen(file.id);
@@ -151,6 +153,9 @@ const ComicCard: React.FC<ComicCardProps> = ({ file, onOpen, onDelete, currentPa
         <Typography variant="caption" color="text.secondary">
           {formatDate(file.createdAt)}
         </Typography>
+
+        {/* Rating Widget */}
+        <RatingWidget fileId={file.id} />
       </CardContent>
 
       {/* Actions */}
