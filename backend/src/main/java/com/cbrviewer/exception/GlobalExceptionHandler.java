@@ -38,6 +38,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
+    @ExceptionHandler(OcrException.class)
+    public ResponseEntity<ErrorResponse> handleOcrException(OcrException ex) {
+        logger.error("OCR processing failed: {}", ex.getMessage());
+        ErrorResponse error = new ErrorResponse("OCR Service Unavailable", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(error);
+    }
+
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex) {
         logger.warn("Illegal argument: {}", ex.getMessage());

@@ -40,3 +40,8 @@ app:
     cleanup-cron: "0 0 2 * * *"
   cors:
     allowed-origins: ${CORS_ORIGINS:http://localhost:5173}
+  security:
+    # AES-256 encryption master key (64 hex characters = 32 bytes)
+    # Generate with: openssl rand -hex 32
+    # For production, set via environment variable: ENCRYPTION_MASTER_KEY
+    encryption-key: ${ENCRYPTION_MASTER_KEY:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef}
