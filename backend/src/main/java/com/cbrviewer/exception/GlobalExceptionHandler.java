@@ -31,6 +31,20 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
     }
 
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleUserNotFound(UserNotFoundException ex) {
+        logger.warn("User not found: {}", ex.getMessage());
+        ErrorResponse error = new ErrorResponse("Not Found", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler(InvalidRoleException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidRole(InvalidRoleException ex) {
+        logger.warn("Invalid role: {}", ex.getMessage());
+        ErrorResponse error = new ErrorResponse("Bad Request", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
     @ExceptionHandler(InvalidArchiveException.class)
     public ResponseEntity<ErrorResponse> handleInvalidArchive(InvalidArchiveException ex) {
         logger.warn("Invalid archive: {}", ex.getMessage());
