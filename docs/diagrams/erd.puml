@@ -1,0 +1,169 @@
+@startuml
+
+' Styling
+skinparam linetype ortho
+skinparam class {
+    BackgroundColor<<Entity>> LightBlue
+    BorderColor<<Entity>> DarkBlue
+    BackgroundColor<<Config>> LightYellow
+    BorderColor<<Config>> DarkOrange
+    BackgroundColor<<Audit>> LightGreen
+    BorderColor<<Audit>> DarkGreen
+}
+
+' Entities
+class users <<Entity>> {
+    **id**: INTEGER [PK]
+    --
+    username: TEXT [UNIQUE, NOT NULL]
+    email: TEXT [UNIQUE, NOT NULL]
+    password_hash: TEXT [NOT NULL]
+    role: TEXT [NOT NULL] {'USER', 'ADMIN'}
+    created_at: TIMESTAMP
+    updated_at: TIMESTAMP
+}
+
+class comic_files <<Entity>> {
+    **id**: INTEGER [PK]
+    --
+    filename: TEXT [NOT NULL]
+    original_filename: TEXT [NOT NULL]
+    file_path: TEXT [NOT NULL]
+    file_type: TEXT [NOT NULL] {'CBR', 'CBZ'}
+    file_size: INTEGER [NOT NULL]
+    page_count: INTEGER [NOT NULL]
+    cover_image_path: TEXT [NULLABLE]
+    uploaded_by: INTEGER [FK → users.id]
+    created_at: TIMESTAMP
+    updated_at: TIMESTAMP
+}
+
+class reading_progress <<Entity>> {
+    **id**: INTEGER [PK]
+    --
+    user_id: INTEGER [FK → users.id]
+    file_id: INTEGER [FK → comic_files.id]
+    current_page: INTEGER [NOT NULL]
+    updated_at: TIMESTAMP
+    --
+    [UNIQUE(user_id, file_id)]
+}
+
+class ratings <<Entity>> {
+    **id**: INTEGER [PK]
+    --
+    user_id: INTEGER [FK → users.id]
+    file_id: INTEGER [FK → comic_files.id]
+    rating: INTEGER [NOT NULL] [CHECK 1-5]
+    created_at: TIMESTAMP
+    --
+    [UNIQUE(user_id, file_id)]
+}
+
+class tts_jobs <<Entity>> {
+    **id**: INTEGER [PK]
+    --
+    file_id: INTEGER [FK → comic_files.id]
+    requested_by: INTEGER [FK → users.id]
+    status: TEXT [NOT NULL]
+    progress: INTEGER [0-100]
+    current_page: INTEGER
+    error_message: TEXT [NULLABLE]
+    created_at: TIMESTAMP
+    updated_at: TIMESTAMP
+}
+
+class tts_results <<Entity>> {
+    **id**: INTEGER [PK]
+    --
+    file_id: INTEGER [FK → comic_files.id]
+    page_number: INTEGER [NOT NULL]
+    ocr_text: TEXT [NULLABLE]
+    speakers_json: TEXT [NULLABLE]
+    audio_file_path: TEXT [NULLABLE]
+    created_at: TIMESTAMP
+    --
+    [UNIQUE(file_id, page_number)]
+}
+
+class llm_config <<Config>> {
+    **id**: INTEGER [PK]
+    --
+    provider: TEXT [NOT NULL]
+    api_key_encrypted: TEXT [NOT NULL]
+    model_name: TEXT [NULLABLE]
+    is_active: INTEGER [DEFAULT 1]
+    priority: INTEGER [DEFAULT 1]
+    created_at: TIMESTAMP
+    updated_at: TIMESTAMP
+}
+
+class audit_logs <<Audit>> {
+    **id**: INTEGER [PK]
+    --
+    user_id: INTEGER [FK → users.id, NULLABLE]
+    action: TEXT [NOT NULL]
+    entity_type: TEXT [NULLABLE]
+    entity_id: INTEGER [NULLABLE]
+    details: TEXT [NULLABLE, JSON]
+    ip_address: TEXT [NULLABLE]
+    created_at: TIMESTAMP
+}
+
+class system_logs <<Audit>> {
+    **id**: INTEGER [PK]
+    --
+    level: TEXT [NOT NULL] {'INFO', 'WARN', 'ERROR'}
+    message: TEXT [NOT NULL]
+    stack_trace: TEXT [NULLABLE]
+    created_at: TIMESTAMP
+}
+
+class feature_flags <<Config>> {
+    **id**: INTEGER [PK]
+    --
+    feature_name: TEXT [UNIQUE, NOT NULL]
+    is_enabled: INTEGER [DEFAULT 0]
+    description: TEXT [NULLABLE]
+    updated_at: TIMESTAMP
+}
+
+' Relationships
+users "1" -- "0..*" comic_files : uploads >
+users "1" -- "0..*" reading_progress : tracks >
+users "1" -- "0..*" ratings : rates >
+users "1" -- "0..*" tts_jobs : requests >
+users "1" -- "0..*" audit_logs : generates >
+
+comic_files "1" -- "0..*" reading_progress : has progress <
+comic_files "1" -- "0..*" ratings : has ratings <
+comic_files "1" -- "0..*" tts_jobs : has jobs <
+comic_files "1" -- "0..*" tts_results : has results <
+
+' Notes
+note right of reading_progress
+  Unique constraint ensures
+  one progress record per
+  user per file (UPSERT)
+end note
+
+note right of ratings
+  Unique constraint prevents
+  duplicate ratings. Re-rating
+  performs UPDATE.
+end note
+
+note right of tts_results
+  speakers_json format:
+  [{speaker: string,
+    text: string,
+    voice_id: string}]
+end note
+
+note top of llm_config
+  api_key_encrypted uses
+  AES-256 symmetric encryption.
+  Master key externalized.
+end note
+
+@enduml

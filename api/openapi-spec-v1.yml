@@ -1,0 +1,561 @@
+openapi: 3.1.0
+info:
+  title: CBR/CBZ Comic Viewer API
+  version: 1.0.0
+  description: |
+    REST API for comic file management and text-to-speech processing.
+    Supports authentication, file upload/retrieval, reading progress tracking,
+    and asynchronous TTS generation with LLM-based OCR.
+  contact:
+    name: API Support
+    email: support@cbrviewer.example.com
+
+servers:
+  - url: http://localhost:8080
+    description: Development server
+
+security:
+  - sessionAuth: []
+    csrfToken: []
+
+tags:
+  - name: Authentication
+    description: User authentication and session management
+  - name: File Management
+    description: Comic file upload, retrieval, and deletion
+
+paths:
+  /api/auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: User login
+      description: Authenticate user credentials and create session
+      operationId: login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            example:
+              username: john_doe
+              password: SecurePass123!
+      responses:
+        '200':
+          description: Login successful, session created
+          headers:
+            Set-Cookie:
+              description: Session cookie (HttpOnly, Secure, SameSite=Lax)
+              schema:
+                type: string
+                example: JSESSIONID=A1B2C3D4E5F6G7H8; Path=/; HttpOnly; Secure; SameSite=Lax
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Authentication failed (invalid credentials)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: AUTHENTICATION_FAILED
+                message: Invalid username or password
+                timestamp: '2025-01-06T14:32:00Z'
+
+  /api/auth/logout:
+    post:
+      tags:
+        - Authentication
+      summary: User logout
+      description: Invalidate current session and clear cookie
+      operationId: logout
+      responses:
+        '200':
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Logged out successfully
+
+  /api/auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: Register new user
+      description: Create new user account with USER role
+      operationId: register
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+            example:
+              username: jane_smith
+              email: jane@example.com
+              password: SecurePass456!
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+        '400':
+          description: Validation error (username or email already exists)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: VALIDATION_ERROR
+                message: Username already exists
+                timestamp: '2025-01-06T14:35:00Z'
+
+  /api/auth/me:
+    get:
+      tags:
+        - Authentication
+      summary: Get current user
+      description: Retrieve authenticated user information from session
+      operationId: getCurrentUser
+      responses:
+        '200':
+          description: User info retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Session invalid or expired
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/files:
+    get:
+      tags:
+        - File Management
+      summary: List comic files
+      description: Retrieve paginated list of comic files with metadata
+      operationId: listFiles
+      parameters:
+        - name: page
+          in: query
+          description: Page number (0-indexed)
+          required: false
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+        - name: size
+          in: query
+          description: Items per page
+          required: false
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+        - name: sort
+          in: query
+          description: Sort field and direction (e.g., createdAt,desc)
+          required: false
+          schema:
+            type: string
+            default: createdAt,desc
+      responses:
+        '200':
+          description: File list retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileListResponse'
+
+    post:
+      tags:
+        - File Management
+      summary: Upload comic file
+      description: Upload CBR/CBZ file (admin only)
+      operationId: uploadFile
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: CBR or CBZ file (max 500MB)
+              required:
+                - file
+      responses:
+        '201':
+          description: File uploaded successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComicFile'
+        '400':
+          description: Invalid file type or file too large
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Non-admin user attempting upload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Server error (disk write failure, corrupt archive)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/files/{id}:
+    get:
+      tags:
+        - File Management
+      summary: Get file metadata
+      description: Retrieve detailed metadata for specific comic file
+      operationId: getFile
+      parameters:
+        - name: id
+          in: path
+          description: Comic file ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: File metadata retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComicFile'
+        '404':
+          description: File not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: FILE_NOT_FOUND
+                message: File with ID 42 does not exist
+                timestamp: '2025-01-06T14:40:00Z'
+
+    delete:
+      tags:
+        - File Management
+      summary: Delete comic file
+      description: Delete file and all related data (admin only)
+      operationId: deleteFile
+      parameters:
+        - name: id
+          in: path
+          description: Comic file ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: File deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: File deleted successfully
+        '403':
+          description: Non-admin user attempting delete
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: File not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/files/{id}/page/{pageNumber}:
+    get:
+      tags:
+        - File Management
+      summary: Get page image
+      description: Extract and stream comic page image
+      operationId: getPageImage
+      parameters:
+        - name: id
+          in: path
+          description: Comic file ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: pageNumber
+          in: path
+          description: Page number (1-indexed)
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Page image retrieved
+          content:
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: File ID or page number invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Archive extraction failure (corrupt file)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    sessionAuth:
+      type: apiKey
+      in: cookie
+      name: JSESSIONID
+      description: Spring Security session cookie (HttpOnly, Secure, SameSite=Lax)
+    csrfToken:
+      type: apiKey
+      in: header
+      name: X-CSRF-TOKEN
+      description: CSRF protection token (required for state-changing operations)
+
+  schemas:
+    User:
+      type: object
+      description: User account information
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        username:
+          type: string
+          example: john_doe
+        email:
+          type: string
+          format: email
+          example: john@example.com
+        role:
+          type: string
+          enum:
+            - USER
+            - ADMIN
+          example: USER
+        createdAt:
+          type: string
+          format: date-time
+          example: '2025-01-01T10:00:00Z'
+        updatedAt:
+          type: string
+          format: date-time
+          example: '2025-01-06T12:00:00Z'
+      required:
+        - id
+        - username
+        - email
+        - role
+
+    ComicFile:
+      type: object
+      description: Comic file metadata
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 42
+        filename:
+          type: string
+          description: UUID-based filename on disk
+          example: a3f5b8c9-1234-5678-90ab-cdef12345678.cbz
+        originalFilename:
+          type: string
+          description: Original uploaded filename
+          example: Batman Vol 1.cbz
+        fileType:
+          type: string
+          enum:
+            - CBR
+            - CBZ
+          example: CBZ
+        fileSize:
+          type: integer
+          format: int64
+          description: File size in bytes
+          example: 45892610
+        pageCount:
+          type: integer
+          example: 120
+        coverImagePath:
+          type: string
+          description: Relative URL to cover image
+          example: /api/files/42/cover
+        uploadedBy:
+          type: integer
+          format: int64
+          description: User ID of uploader
+          example: 1
+        averageRating:
+          type: number
+          format: float
+          description: Average user rating (1-5 stars)
+          example: 4.5
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+          example: '2025-01-05T10:15:30Z'
+        updatedAt:
+          type: string
+          format: date-time
+          example: '2025-01-06T12:00:00Z'
+      required:
+        - id
+        - filename
+        - originalFilename
+        - fileType
+        - fileSize
+        - pageCount
+        - uploadedBy
+        - createdAt
+
+    FileListResponse:
+      type: object
+      description: Paginated list of comic files
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/ComicFile'
+        totalPages:
+          type: integer
+          example: 5
+        totalElements:
+          type: integer
+          example: 93
+        pageNumber:
+          type: integer
+          example: 0
+        pageSize:
+          type: integer
+          example: 20
+      required:
+        - content
+        - totalPages
+        - totalElements
+        - pageNumber
+        - pageSize
+
+    LoginRequest:
+      type: object
+      description: User login credentials
+      properties:
+        username:
+          type: string
+          example: john_doe
+        password:
+          type: string
+          format: password
+          example: SecurePass123!
+      required:
+        - username
+        - password
+
+    LoginResponse:
+      type: object
+      description: Login success response
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        sessionId:
+          type: string
+          description: Session identifier (also in JSESSIONID cookie)
+          example: A1B2C3D4E5F6G7H8
+      required:
+        - user
+        - sessionId
+
+    RegisterRequest:
+      type: object
+      description: New user registration
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 50
+          example: jane_smith
+        email:
+          type: string
+          format: email
+          example: jane@example.com
+        password:
+          type: string
+          format: password
+          minLength: 8
+          example: SecurePass456!
+      required:
+        - username
+        - email
+        - password
+
+    ErrorResponse:
+      type: object
+      description: Standard error response format
+      properties:
+        error:
+          type: string
+          description: Error code identifier
+          example: AUTHENTICATION_FAILED
+        message:
+          type: string
+          description: Human-readable error message
+          example: Invalid username or password
+        timestamp:
+          type: string
+          format: date-time
+          example: '2025-01-06T14:32:00Z'
+        path:
+          type: string
+          description: Request path that generated error
+          example: /api/auth/login
+      required:
+        - error
+        - message
+        - timestamp
