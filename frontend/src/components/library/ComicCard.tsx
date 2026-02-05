@@ -63,8 +63,8 @@ const ComicCard: React.FC<ComicCardProps> = ({ file, onOpen, onDelete, currentPa
     }
   };
 
-  // Use cover image if available, otherwise use placeholder
-  const coverUrl = file.coverImagePath || '/placeholder-cover.jpg';
+  // Use cover image if available, otherwise use first page as cover
+  const coverUrl = file.coverImagePath || `/api/files/${file.id}/page/1`;
 
   return (
     <Card

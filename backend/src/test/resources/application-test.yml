@@ -1,0 +1,30 @@
+spring:
+  application:
+    name: cbr-viewer-test
+  datasource:
+    url: "jdbc:sqlite::memory:"
+    driver-class-name: org.sqlite.JDBC
+  jpa:
+    database-platform: org.hibernate.community.dialect.SQLiteDialect
+    hibernate:
+      ddl-auto: create-drop
+  servlet:
+    session:
+      timeout: 1h
+
+server:
+  port: 0
+
+app:
+  storage:
+    comics-path: ./test-storage/comics
+    audio-path: ./test-storage/audio
+    cache-path: ./test-storage/cache
+  cache:
+    max-size-mb: 10
+    ttl-days: 1
+    cleanup-cron: "0 0 2 * * *"
+  cors:
+    allowed-origins: "http://localhost:3344"
+  security:
+    encryption-key: "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"

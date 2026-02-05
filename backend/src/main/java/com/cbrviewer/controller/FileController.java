@@ -33,19 +33,13 @@ public class FileController {
 
         // 1. Get current user from session
         Long userId = (Long) session.getAttribute("userId");
-        String role = (String) session.getAttribute("role");
 
         // 2. Check authentication
-        if (userId == null || role == null) {
+        if (userId == null) {
             throw new AccessDeniedException("Authentication required");
         }
 
-        // 3. Check admin authorization
-        if (!"ADMIN".equals(role)) {
-            throw new AccessDeniedException("Admin role required for file upload");
-        }
-
-        // 4. Delegate to service
+        // 3. Delegate to service
         ComicFile savedFile = fileService.uploadFile(file, userId);
 
         // 5. Convert to DTO and return
@@ -54,14 +48,24 @@ public class FileController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ComicFileResponse>> listFiles() {
+    public ResponseEntity<Map<String, Object>> listFiles(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
         // Get all files sorted by created date DESC
         List<ComicFile> files = fileService.listFiles();
 
         // Convert to DTOs
-        List<ComicFileResponse> response = files.stream()
+        List<ComicFileResponse> content = files.stream()
                 .map(ComicFileResponse::fromEntity)
                 .collect(Collectors.toList());
+
+        // Build paginated response
+        Map<String, Object> response = new HashMap<>();
+        response.put("content", content);
+        response.put("totalPages", 1);
+        response.put("totalElements", content.size());
+        response.put("pageNumber", page);
+        response.put("pageSize", size);
 
         return ResponseEntity.ok(response);
     }
@@ -78,20 +82,13 @@ public class FileController {
             @PathVariable Long id,
             HttpSession session) throws IOException {
 
-        // 1. Get role from session
-        String role = (String) session.getAttribute("role");
-
-        // 2. Check authentication
-        if (role == null) {
+        // 1. Check authentication
+        Long userId = (Long) session.getAttribute("userId");
+        if (userId == null) {
             throw new AccessDeniedException("Authentication required");
         }
 
-        // 3. Check admin authorization
-        if (!"ADMIN".equals(role)) {
-            throw new AccessDeniedException("Admin role required for file deletion");
-        }
-
-        // 4. Delegate to service
+        // 2. Delegate to service
         fileService.deleteFile(id);
 
         // 5. Return success message

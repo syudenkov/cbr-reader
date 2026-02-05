@@ -17,11 +17,11 @@ interface AuthState {
   error: string | null;
 }
 
-// Initial state
+// Initial state - loading: true to prevent redirect before auth check completes
 const initialState: AuthState = {
   isAuthenticated: false,
   user: null,
-  loading: false,
+  loading: true,  // Start as true to wait for fetchCurrentUser
   error: null,
 };
 

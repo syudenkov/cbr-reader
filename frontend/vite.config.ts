@@ -2,7 +2,9 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
-// CBR Viewer Vite Configuration - Based on 06_UI_UX_Architecture.md
+// CBR Viewer Vite Configuration
+// Production: Frontend is bundled with Spring Boot backend
+// Development: Use vite dev server with proxy to backend
 export default defineConfig({
   plugins: [
     react(),
@@ -11,7 +13,7 @@ export default defineConfig({
       manifest: {
         name: 'CBR/CBZ Viewer',
         short_name: 'Comic Viewer',
-        description: 'Web-based comic book reader with TTS',
+        description: 'Web-based comic book reader',
         theme_color: '#2196f3',
         background_color: '#0a0a0a',
         display: 'standalone',
@@ -31,6 +33,9 @@ export default defineConfig({
     }),
   ],
   build: {
+    // Output to dist folder (copied to backend/src/main/resources/static by gradle)
+    outDir: 'dist',
+    emptyOutDir: true,
     rollupOptions: {
       output: {
         manualChunks: {
@@ -42,11 +47,14 @@ export default defineConfig({
     },
   },
   server: {
-    port: 5173,
+    // Dev server config - only used during development
+    port: 3344,
     proxy: {
       '/api': {
-        target: 'http://localhost:8080',
+        target: 'http://localhost:4433',
         changeOrigin: true,
+        cookieDomainRewrite: 'localhost',
+        cookiePathRewrite: '/',
       },
     },
   },

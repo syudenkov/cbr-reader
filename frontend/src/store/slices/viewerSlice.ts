@@ -4,6 +4,36 @@ import * as progressService from '../../services/progressService';
 import type { ComicFile } from '../../services/viewerService';
 import type { RootState } from '../store';
 
+// Local storage keys for persisting viewer preferences
+const STORAGE_KEYS = {
+  ZOOM_LEVEL: 'viewer_zoom_level',
+  VIEW_MODE: 'viewer_mode',
+};
+
+// Load persisted values from localStorage
+const loadPersistedZoom = (): number => {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEYS.ZOOM_LEVEL);
+    if (saved) {
+      const zoom = parseInt(saved, 10);
+      if (zoom >= 50 && zoom <= 200) return zoom;
+    }
+  } catch {
+    // localStorage not available
+  }
+  return 100;
+};
+
+const loadPersistedMode = (): 'page' | 'scroll' => {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEYS.VIEW_MODE);
+    if (saved === 'scroll') return 'scroll';
+  } catch {
+    // localStorage not available
+  }
+  return 'page';
+};
+
 interface ViewerState {
   // Current comic being viewed
   currentFile: ComicFile | null;
@@ -29,10 +59,10 @@ interface ViewerState {
 
 const initialState: ViewerState = {
   currentFile: null,
-  mode: 'page',
+  mode: loadPersistedMode(),
   currentPage: 1,
   totalPages: 0,
-  zoomLevel: 100,
+  zoomLevel: loadPersistedZoom(),
   isFullscreen: false,
   preloadedPages: {},
   pageLoadingStatus: 'idle',
@@ -110,6 +140,12 @@ const viewerSlice = createSlice({
   reducers: {
     setViewMode: (state, action: PayloadAction<'page' | 'scroll'>) => {
       state.mode = action.payload;
+      // Persist to localStorage
+      try {
+        localStorage.setItem(STORAGE_KEYS.VIEW_MODE, action.payload);
+      } catch {
+        // localStorage not available
+      }
     },
     setCurrentPage: (state, action: PayloadAction<number>) => {
       state.currentPage = action.payload;
@@ -119,6 +155,12 @@ const viewerSlice = createSlice({
     },
     setZoomLevel: (state, action: PayloadAction<number>) => {
       state.zoomLevel = action.payload;
+      // Persist to localStorage
+      try {
+        localStorage.setItem(STORAGE_KEYS.ZOOM_LEVEL, action.payload.toString());
+      } catch {
+        // localStorage not available
+      }
     },
     setFullscreen: (state, action: PayloadAction<boolean>) => {
       state.isFullscreen = action.payload;
@@ -129,8 +171,15 @@ const viewerSlice = createSlice({
     clearPreloadedPages: (state) => {
       state.preloadedPages = {};
     },
-    resetViewer: () => {
-      return initialState;
+    resetViewer: (state) => {
+      // Preserve user preferences (zoom, mode) when resetting
+      const preservedZoom = state.zoomLevel;
+      const preservedMode = state.mode;
+      return {
+        ...initialState,
+        zoomLevel: preservedZoom,
+        mode: preservedMode,
+      };
     },
   },
   extraReducers: (builder) => {

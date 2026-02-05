@@ -41,7 +41,7 @@ const RatingWidget: React.FC<RatingWidgetProps> = ({ fileId }) => {
   }, [fileId]);
 
   const handleRatingChange = async (
-    event: React.SyntheticEvent,
+    _event: React.SyntheticEvent,
     newValue: number | null
   ) => {
     if (newValue === null || saving) return;

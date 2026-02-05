@@ -12,13 +12,13 @@ spring:
       cookie:
         http-only: true
         secure: ${COOKIE_SECURE:false}
-        same-site: strict
+        same-site: lax
     multipart:
       max-file-size: 500MB
       max-request-size: 500MB
 
 server:
-  port: 8080
+  port: 4433
 
 management:
   endpoints:
@@ -31,15 +31,15 @@ management:
 
 app:
   storage:
-    comics-path: ${COMICS_PATH:./storage/comics}
-    audio-path: ${AUDIO_PATH:./storage/audio}
-    cache-path: ${CACHE_PATH:./storage/cache}
+    comics-path: ${COMICS_PATH:/home/stress/projects/cbr_viewer/backend/storage/comics}
+    audio-path: ${AUDIO_PATH:/home/stress/projects/cbr_viewer/backend/storage/audio}
+    cache-path: ${CACHE_PATH:/home/stress/projects/cbr_viewer/backend/storage/cache}
   cache:
     max-size-mb: 100
     ttl-days: 20
     cleanup-cron: "0 0 2 * * *"
   cors:
-    allowed-origins: ${CORS_ORIGINS:http://localhost:5173}
+    allowed-origins: ${CORS_ORIGINS:http://localhost:3344}
   security:
     # AES-256 encryption master key (64 hex characters = 32 bytes)
     # Generate with: openssl rand -hex 32

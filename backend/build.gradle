@@ -34,6 +34,51 @@ dependencies {
     testImplementation 'org.springframework.security:spring-security-test'
 }
 
+// Frontend build configuration
+def frontendDir = file("${project.rootDir}/../frontend")
+def frontendBuildDir = file("${frontendDir}/dist")
+def staticDir = file("${project.projectDir}/src/main/resources/static")
+
+task npmInstall(type: Exec) {
+    description = 'Install frontend dependencies'
+    workingDir frontendDir
+    commandLine 'npm', 'install'
+    inputs.file("${frontendDir}/package.json")
+    inputs.file("${frontendDir}/package-lock.json")
+    outputs.dir("${frontendDir}/node_modules")
+}
+
+task buildFrontend(type: Exec, dependsOn: npmInstall) {
+    description = 'Build frontend for production'
+    workingDir frontendDir
+    commandLine 'npm', 'run', 'build'
+    inputs.dir("${frontendDir}/src")
+    inputs.file("${frontendDir}/package.json")
+    inputs.file("${frontendDir}/vite.config.ts")
+    inputs.file("${frontendDir}/tsconfig.json")
+    outputs.dir(frontendBuildDir)
+}
+
+task copyFrontend(type: Copy, dependsOn: buildFrontend) {
+    description = 'Copy frontend build to Spring Boot static resources'
+    from frontendBuildDir
+    into staticDir
+}
+
+task cleanFrontend(type: Delete) {
+    description = 'Clean frontend build artifacts from static directory'
+    delete staticDir
+}
+
+// Make processResources depend on copyFrontend so frontend is built before jar
+processResources.dependsOn copyFrontend
+
+// Clean frontend when running clean task
+clean.dependsOn cleanFrontend
+
 tasks.named('test') {
     useJUnitPlatform()
+    jvmArgs '-XX:+EnableDynamicAgentLoading'
+    jvmArgs '--add-opens', 'java.base/java.lang=ALL-UNNAMED'
+    jvmArgs '--add-opens', 'java.base/java.lang.reflect=ALL-UNNAMED'
 }

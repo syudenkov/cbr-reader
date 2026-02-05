@@ -17,5 +17,10 @@ export const store = configureStore({
   },
 });
 
+// Expose store for debugging
+if (typeof window !== 'undefined') {
+  (window as unknown as { __store: typeof store }).__store = store;
+}
+
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;

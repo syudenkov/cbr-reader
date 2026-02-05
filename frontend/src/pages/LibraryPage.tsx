@@ -30,7 +30,7 @@ const LibraryPage: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  const { items: comics, status, error } = useAppSelector((state) => state.files);
+  const { items: comics = [], status, error } = useAppSelector((state) => state.files);
   const { uploadProgress, uploadStatus, uploadError } = useAppSelector((state) => state.files);
 
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);

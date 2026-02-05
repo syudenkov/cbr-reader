@@ -1,14 +1,14 @@
 import { useEffect } from 'react';
-import { Box, IconButton, Typography } from '@mui/material';
+import { Box, IconButton, Typography, Tooltip } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import FullscreenIcon from '@mui/icons-material/Fullscreen';
 import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
+import ViewDayIcon from '@mui/icons-material/ViewDay';
+import ViewCarouselIcon from '@mui/icons-material/ViewCarousel';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { setFullscreen } from '../../store/slices/viewerSlice';
-import { TtsJobButton } from './TtsJobButton';
+import { setFullscreen, setViewMode } from '../../store/slices/viewerSlice';
 
 interface ViewerToolbarProps {
-  fileId: number;
   title: string | undefined;
   currentPage: number;
   totalPages: number;
@@ -16,11 +16,15 @@ interface ViewerToolbarProps {
 }
 
 /**
- * Top toolbar for the viewer with back button, title, page counter, TTS button, and fullscreen toggle
+ * Top toolbar for the viewer with back button, title, page counter, and fullscreen toggle
  */
-export const ViewerToolbar = ({ fileId, title, currentPage, totalPages, onBack }: ViewerToolbarProps) => {
+export const ViewerToolbar = ({ title, currentPage, totalPages, onBack }: ViewerToolbarProps) => {
   const dispatch = useAppDispatch();
-  const isFullscreen = useAppSelector((state) => state.viewer.isFullscreen);
+  const { isFullscreen, mode } = useAppSelector((state) => state.viewer);
+
+  const handleToggleMode = () => {
+    dispatch(setViewMode(mode === 'page' ? 'scroll' : 'page'));
+  };
 
   const handleToggleFullscreen = async () => {
     const viewerElement = document.getElementById('viewer-container');
@@ -93,9 +97,13 @@ export const ViewerToolbar = ({ fileId, title, currentPage, totalPages, onBack }
         )}
       </Box>
 
-      {/* Right: TTS button and Fullscreen toggle */}
+      {/* Right: Mode toggle and Fullscreen toggle */}
       <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-        <TtsJobButton fileId={fileId} />
+        <Tooltip title={mode === 'page' ? 'Switch to Scroll Mode' : 'Switch to Page Mode'}>
+          <IconButton onClick={handleToggleMode} aria-label="Toggle view mode" size="large">
+            {mode === 'page' ? <ViewDayIcon /> : <ViewCarouselIcon />}
+          </IconButton>
+        </Tooltip>
         <IconButton onClick={handleToggleFullscreen} aria-label="Toggle fullscreen" size="large" edge="end">
           {isFullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}
         </IconButton>
