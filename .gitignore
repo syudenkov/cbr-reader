@@ -1,6 +1,8 @@
-# CodeMachine / Claudiomiro - ignore all agent/task files
+# AI/Agent tool files
 .codemachine/
 .claudiomiro/
+.playwright-mcp/
+claude.md
 
 # Dependencies
 node_modules/
@@ -14,8 +16,13 @@ frontend/dist/
 backend/build/
 backend/.gradle/
 backend/target/
+backend/src/main/resources/static/
 *.class
 *.jar
+
+# Runtime storage (uploaded comics, cache, audio)
+storage/
+backend/storage/
 
 # Environment files
 .env
@@ -37,3 +44,8 @@ backend/data/
 *.db
 *.db-shm
 *.db-wal
+
+# IDE
+.idea/
+.vscode/
+*.iml
